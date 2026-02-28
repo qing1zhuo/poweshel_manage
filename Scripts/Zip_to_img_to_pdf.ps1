@@ -1,0 +1,198 @@
+<#
+  整合脚本：先批量解压指定路径下的ZIP，再将路径内图片批量合成PDF
+  执行顺序：用户输入工作路径 → 解压ZIP → 图片合成PDF → 自动清理原文件/压缩包
+  依赖：合成PDF需安装ImageMagick 7+并配置环境变量，解压仅依赖Windows原生功能
+  新增：循环执行逻辑，支持重复输入路径，无需重启脚本
+#>
+# 解决PowerShell中文乱码问题，仅执行一次即可
+chcp 65001 | Out-Null
+$ErrorActionPreference = "Stop" # 捕获关键异常
+# 定义日志颜色常量，统一可视化输出
+$COLOR_INFO = "Cyan"
+$COLOR_SUCCESS = "Green"
+$COLOR_ERROR = "Red"
+$COLOR_CLEAN = "Yellow"
+$COLOR_TITLE = "Yellow" # 新增标题颜色，突出功能说明
+
+# ===================== 脚本启动：打印核心功能说明 ======================
+Write-Host "`n=====================================" -ForegroundColor $COLOR_TITLE
+Write-Host "📌 ZIP批量解压+图片批量合成PDF 整合脚本" -ForegroundColor $COLOR_TITLE
+Write-Host "=====================================" -ForegroundColor $COLOR_TITLE
+Write-Host "🔧 核心功能：" -ForegroundColor $COLOR_INFO
+Write-Host "  1. 支持用户自定义工作路径，所有操作均限定在该路径内执行" -ForegroundColor $COLOR_INFO
+Write-Host "  2. 执行顺序：先解压 → 后合成PDF，全程自动化无需手动干预" -ForegroundColor $COLOR_INFO
+Write-Host "  3. 解压规则：当前路径ZIP解压到同名子文件夹，解压后自动删除原ZIP" -ForegroundColor $COLOR_INFO
+Write-Host "  4. 合成规则：子文件夹内5位补零数字图片合成PDF，PDF保存在路径根目录，合成后删除原图片文件夹" -ForegroundColor $COLOR_INFO
+Write-Host "  5. 自动清理：解压/合成成功后，自动删除原压缩包/原图片文件夹，减少冗余文件" -ForegroundColor $COLOR_INFO
+Write-Host "  6. 循环执行：支持重复输入新路径，无需重启脚本" -ForegroundColor $COLOR_INFO # 新增说明
+Write-Host "⚙️  运行依赖：" -ForegroundColor $COLOR_INFO
+Write-Host "  1. 解压功能：无依赖，仅使用Windows PowerShell原生命令" -ForegroundColor $COLOR_INFO
+Write-Host "  2. 合成功能：需安装ImageMagick 7+并配置系统环境变量（magick命令可调用）" -ForegroundColor $COLOR_INFO
+Write-Host "=====================================`n" -ForegroundColor $COLOR_TITLE
+
+# ===================== 定义解压功能 =====================
+function Invoke-ZipExtract {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$WorkDir # 传入用户指定的工作路径
+    )
+    Write-Host "`n=====================================" -ForegroundColor $COLOR_INFO
+    Write-Host "开始执行【批量解压ZIP】流程" -ForegroundColor $COLOR_INFO
+    Write-Host "=====================================" -ForegroundColor $COLOR_INFO
+
+    # 获取工作路径下的所有ZIP文件（不递归子文件夹）
+    $zipFiles = Get-ChildItem -Path $WorkDir -Filter *.zip -File -ErrorAction SilentlyContinue
+    if ($zipFiles.Count -eq 0) {
+        Write-Host "ℹ️  工作路径下未找到ZIP压缩包，跳过解压流程" -ForegroundColor $COLOR_INFO
+        return
+    }
+
+    # 遍历解压每个ZIP
+    foreach ($zip in $zipFiles) {
+        try {
+            # 解压到「与ZIP同名」的子文件夹
+            $extractDir = Join-Path -Path $WorkDir -ChildPath $zip.BaseName
+            # 解压（-Force覆盖同名文件）
+            Expand-Archive -Path $zip.FullName -DestinationPath $extractDir -Force
+            Write-Host "✅ 解压成功：$($zip.Name) → $extractDir" -ForegroundColor $COLOR_SUCCESS
+            # 解压完成后删除原ZIP包（静默忽略删除错误）
+            Remove-Item -Path $zip.FullName -Force -ErrorAction SilentlyContinue
+            Write-Host "🗑️  已清理原压缩包：$($zip.Name)" -ForegroundColor $COLOR_CLEAN
+        }
+        catch {
+            Write-Host "❌ 解压失败：$($zip.Name)，错误原因：$($_.Exception.Message)" -ForegroundColor $COLOR_ERROR
+        }
+    }
+    Write-Host "`n📌 批量解压ZIP流程执行完成" -ForegroundColor $COLOR_INFO
+}
+
+# ===================== 定义合成PDF功能 =====================
+function Invoke-Img2Pdf {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$WorkDir # 传入用户指定的工作路径
+    )
+    Write-Host "`n=====================================" -ForegroundColor $COLOR_INFO
+    Write-Host "开始执行【图片批量合成PDF】流程" -ForegroundColor $COLOR_INFO
+    Write-Host "=====================================" -ForegroundColor $COLOR_INFO
+
+    # 校验ImageMagick 7+的magick命令是否可用
+    Write-Host "ℹ️  正在检测ImageMagick 7+环境..." -ForegroundColor $COLOR_INFO
+    if (-not (Get-Command -Name magick -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ 未检测到ImageMagick 7+！" -ForegroundColor $COLOR_ERROR
+        Write-Host "请安装ImageMagick 7+并将其安装目录添加到系统环境变量PATH中，重启PowerShell后重试" -ForegroundColor $COLOR_ERROR
+        return $false # 返回执行状态，便于外层判断
+    }
+    Write-Host "✅ ImageMagick 7+环境检测通过" -ForegroundColor $COLOR_SUCCESS
+
+    # 获取工作路径下的所有子文件夹
+    $subFolders = Get-ChildItem -Path $WorkDir -Directory -ErrorAction SilentlyContinue
+    if ($subFolders.Count -eq 0) {
+        Write-Host "ℹ️  工作路径下未找到子文件夹，无图片可处理，跳过PDF合成流程" -ForegroundColor $COLOR_INFO
+        return $true
+    }
+    Write-Host "ℹ️  共找到 $($subFolders.Count) 个待处理子文件夹，开始逐个合成PDF..." -ForegroundColor $COLOR_INFO
+
+    # 遍历每个子文件夹处理
+    foreach ($folder in $subFolders) {
+        $folderPath = $folder.FullName
+        $pdfName = "$($folder.Name).pdf"
+        $pdfPath = Join-Path -Path $WorkDir -ChildPath $pdfName # PDF保存到工作路径根目录
+        Write-Host "`nℹ️  正在处理文件夹：$($folder.Name)" -ForegroundColor $COLOR_INFO
+
+        try {
+            # 筛选符合规则的图片：5位补零纯数字命名 + 支持WebP/JPG/PNG/JPEG + 递归查找
+            $imgPattern = "^(\d{5})\.(webp|jpg|png|jpeg)$"
+            $images = Get-ChildItem -Path $folderPath -Recurse -File | 
+                Where-Object { $_.Name -match $imgPattern -and $_.BaseName -match '^\d{5}$' } |
+                Sort-Object { [int]$_.BaseName } # 按数字正序排序
+
+            if ($images.Count -eq 0) {
+                Write-Host "ℹ️  该文件夹内无符合规则的图片（5位补零纯数字命名），跳过" -ForegroundColor $COLOR_INFO
+                continue
+            }
+
+            # 调用ImageMagick合成PDF（兼容中文路径）
+            Write-Host "ℹ️  找到 $($images.Count) 张符合规则的图片，开始合成PDF..." -ForegroundColor $COLOR_INFO
+            magick $images.FullName -compress LZW "$pdfPath" # -compress LZW优化PDF体积
+
+            # 校验PDF是否生成成功
+            if (Test-Path -Path $pdfPath -PathType Leaf) {
+                Write-Host "✅ PDF合成成功：$pdfName" -ForegroundColor $COLOR_SUCCESS
+                # 成功后删除原图片文件夹（强制删除，捕获删除错误）
+                try {
+                    Remove-Item -Path $folderPath -Recurse -Force
+                    Write-Host "🗑️  已清理原图片文件夹：$($folder.Name)" -ForegroundColor $COLOR_CLEAN
+                }
+                catch {
+                    Write-Host "⚠️  清理原文件夹失败：$($folder.Name)，错误原因：$($_.Exception.Message)" -ForegroundColor $COLOR_ERROR
+                }
+            }
+            else {
+                Write-Host "❌ PDF合成失败：未检测到生成的PDF文件" -ForegroundColor $COLOR_ERROR
+            }
+        }
+        catch {
+            Write-Host "❌ 处理文件夹 $($folder.Name) 失败，错误原因：$($_.Exception.Message)" -ForegroundColor $COLOR_ERROR
+            continue # 单个文件夹失败，继续处理下一个
+        }
+    }
+    Write-Host "`n📌 图片批量合成PDF流程执行完成" -ForegroundColor $COLOR_INFO
+    return $true
+}
+
+# ===================== 定义路径校验功能（抽离复用） =====================
+function Test-WorkPath {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$InputPath
+    )
+    # 处理路径引号/空格问题
+    $WorkPath = $InputPath.Trim().Trim('"')
+    # 校验路径是否存在
+    if (-not (Test-Path -Path $WorkPath -PathType Container)) {
+        Write-Host "`n错误：你输入的路径 [$WorkPath] 不存在，请检查路径是否正确！" -ForegroundColor $COLOR_ERROR
+        return $null
+    }
+    # 转为标准绝对路径
+    $WorkPath = (Resolve-Path -Path $WorkPath).Path
+    Write-Host "`n✅ 工作路径校验通过，最终执行路径：$WorkPath" -ForegroundColor $COLOR_SUCCESS
+    return $WorkPath
+}
+
+# ===================== 主循环执行逻辑（核心新增） =====================
+do {
+    # ===================== 输入并校验工作路径 =====================
+    Write-Host "`n===== 请输入工作路径（所有解压/合成操作均在此路径执行）=====" -ForegroundColor $COLOR_INFO
+    Write-Host "示例：D:\文档\我的图片包 或 D:\test" -ForegroundColor $COLOR_INFO
+    $InputPath = Read-Host -Prompt "请输入绝对路径"
+    
+    # 校验路径，失败则重新输入
+    $WorkPath = Test-WorkPath -InputPath $InputPath
+    if ($null -eq $WorkPath) {
+        continue
+    }
+
+    # ===================== 执行解压 + 合成PDF =====================
+    Invoke-ZipExtract -WorkDir $WorkPath
+    $pdfResult = Invoke-Img2Pdf -WorkDir $WorkPath
+
+    # ===================== 询问是否继续执行 =====================
+    Write-Host "`n=====================================" -ForegroundColor $COLOR_TITLE
+    $continueInput = Read-Host -Prompt "✅ 本次流程执行完毕，是否继续处理新路径？(Y/N)"
+    # 统一转为大写，兼容大小写输入
+    $continueInput = $continueInput.Trim().ToUpper()
+
+    # 判断是否退出
+    if ($continueInput -ne "N") {
+	Write-Host "`n📌 准备处理新路径，请继续输入..." -ForegroundColor $COLOR_INFO
+    }
+    else {
+	Write-Host "`n📌 感谢使用，脚本即将退出..." -ForegroundColor $COLOR_SUCCESS
+        break  
+    }
+
+} while ($true) # 无限循环，直到用户选择退出
+
+# 保留窗口，避免闪退
+Pause

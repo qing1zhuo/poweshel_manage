@@ -1,0 +1,17 @@
+﻿{
+    "Zip_to_img_to_pdf":  {
+                              "Description":  "将压缩包解压，并将其中图片合成为pdf，然后只保留pdf，删除压缩包与文件夹",
+                              "Version":  3,
+                              "CreateTime":  "2026-02-24 18:15:10"
+                          },
+    "Count_files":  {
+                        "Description":  "计算一个文件夹有多少pdf",
+                        "Version":  3,
+                        "CreateTime":  "2026-02-24 18:19:39"
+                    },
+    "Push-ToGitHub": {
+                        "Description": "将指定文件夹内容推送到 GitHub 仓库（自动初始化、提交并推送）",
+                        "Version": 1,
+                        "CreateTime": "2026-02-28 10:00:00"
+                    }
+}
