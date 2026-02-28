@@ -1,7 +1,7 @@
 {
     "Zip_to_img_to_pdf":  {
-                              "Description":  "将压缩包解压，并将其中图片合成为pdf，然后只保留pdf，删除压缩包与文件夹",
-                              "Version":  3,
+                              "Description":  "全自动化文档数字化流水线：集成 ZIP 批量解压、图像提取与高质 PDF 合成，支持自动清理临时文件",
+                              "Version":  3.1,
                               "CreateTime":  "2026-02-24 18:15:10"
                           },
     "Count_files":  {

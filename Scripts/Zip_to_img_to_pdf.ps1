@@ -1,8 +1,16 @@
 <#
-  整合脚本：先批量解压指定路径下的ZIP，再将路径内图片批量合成PDF
-  执行顺序：用户输入工作路径 → 解压ZIP → 图片合成PDF → 自动清理原文件/压缩包
-  依赖：合成PDF需安装ImageMagick 7+并配置环境变量，解压仅依赖Windows原生功能
-  新增：循环执行逻辑，支持重复输入路径，无需重启脚本
+.SYNOPSIS
+    全自动化文档数字化流水线：批量处理 ZIP 压缩包并合成 PDF。
+.DESCRIPTION
+    该脚本提供了一套完整的自动化流程：
+    1. 自动扫描并解压指定目录下的所有 ZIP 压缩包。
+    2. 从解压后的文件夹中提取有序图片（支持 5 位补零命名规则）。
+    3. 调用 ImageMagick 引擎将图片合成为高质量 PDF 电子文档。
+    4. 执行静默清理，自动移除原压缩包及解压后的临时图像文件夹。
+.PARAMETER WorkDir
+    指定的工作路径，脚本将在该路径下递归搜索并处理文件。
+.NOTES
+    依赖项：需安装 ImageMagick 7+ 并确保 'magick' 命令在系统环境变量中可用。
 #>
 # 解决PowerShell中文乱码问题，仅执行一次即可
 chcp 65001 | Out-Null
@@ -16,18 +24,18 @@ $COLOR_TITLE = "Yellow" # 新增标题颜色，突出功能说明
 
 # ===================== 脚本启动：打印核心功能说明 ======================
 Write-Host "`n=====================================" -ForegroundColor $COLOR_TITLE
-Write-Host "📌 ZIP批量解压+图片批量合成PDF 整合脚本" -ForegroundColor $COLOR_TITLE
+Write-Host "🚀 文档自动化流水线：ZIP 提取与 PDF 合成" -ForegroundColor $COLOR_TITLE
 Write-Host "=====================================" -ForegroundColor $COLOR_TITLE
 Write-Host "🔧 核心功能：" -ForegroundColor $COLOR_INFO
-Write-Host "  1. 支持用户自定义工作路径，所有操作均限定在该路径内执行" -ForegroundColor $COLOR_INFO
-Write-Host "  2. 执行顺序：先解压 → 后合成PDF，全程自动化无需手动干预" -ForegroundColor $COLOR_INFO
-Write-Host "  3. 解压规则：当前路径ZIP解压到同名子文件夹，解压后自动删除原ZIP" -ForegroundColor $COLOR_INFO
-Write-Host "  4. 合成规则：子文件夹内5位补零数字图片合成PDF，PDF保存在路径根目录，合成后删除原图片文件夹" -ForegroundColor $COLOR_INFO
-Write-Host "  5. 自动清理：解压/合成成功后，自动删除原压缩包/原图片文件夹，减少冗余文件" -ForegroundColor $COLOR_INFO
-Write-Host "  6. 循环执行：支持重复输入新路径，无需重启脚本" -ForegroundColor $COLOR_INFO # 新增说明
+Write-Host "  1. 智能路径管理：支持自定义工作路径，实现环境隔离操作" -ForegroundColor $COLOR_INFO
+Write-Host "  2. 自动化工作流：解压 -> 提取 -> 合成 -> 清理，全程零人工干预" -ForegroundColor $COLOR_INFO
+Write-Host "  3. 智能解压规则：支持 ZIP 到同名文件夹的映射解压" -ForegroundColor $COLOR_INFO
+Write-Host "  4. 高质合成引擎：基于 ImageMagick 的工业级 PDF 合成技术" -ForegroundColor $COLOR_INFO
+Write-Host "  5. 零残留清理：任务完成后自动销毁临时文件，保持磁盘整洁" -ForegroundColor $COLOR_INFO
+Write-Host "  6. 持续作业模式：支持循环路径输入，满足大批量处理需求" -ForegroundColor $COLOR_INFO
 Write-Host "⚙️  运行依赖：" -ForegroundColor $COLOR_INFO
-Write-Host "  1. 解压功能：无依赖，仅使用Windows PowerShell原生命令" -ForegroundColor $COLOR_INFO
-Write-Host "  2. 合成功能：需安装ImageMagick 7+并配置系统环境变量（magick命令可调用）" -ForegroundColor $COLOR_INFO
+Write-Host "  1. 解压引擎：Windows PowerShell 原生支持" -ForegroundColor $COLOR_INFO
+Write-Host "  2. 合成引擎：ImageMagick 7+ (需配置系统环境变量)" -ForegroundColor $COLOR_INFO
 Write-Host "=====================================`n" -ForegroundColor $COLOR_TITLE
 
 # ===================== 定义解压功能 =====================
