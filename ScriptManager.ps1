@@ -478,14 +478,6 @@ function Run-Script {
         $scriptName = $selectedScript.Name -replace '\.ps1$',''
         $scriptPath = $selectedScript.FullName
 
-        # 二次确认（防止误运行危险脚本）
-        $confirm = Read-Host "`n⚠️ 确定要运行[$scriptName.ps1]吗？(Y/N，默认Y)"
-        if ($confirm -eq 'N' -or $confirm -eq 'n') {
-            Write-Host "✅ 已取消运行操作" -ForegroundColor Green
-            Read-Host "按任意键返回菜单"
-            return
-        }
-
         # 执行脚本（捕获所有错误）
         Write-Host "`n🚀 正在运行[$scriptName.ps1]，执行结果如下：" -ForegroundColor Green
         Write-Host "--------------------------------------------------------" -ForegroundColor Gray
