@@ -179,7 +179,7 @@ do {
 
     # ===================== 询问是否继续执行 =====================
     Write-Host "`n=====================================" -ForegroundColor $COLOR_TITLE
-    $continueInput = Read-Host -Prompt "✅ 本次流程执行完毕，是否继续处理新路径？(Y/N)"
+    $continueInput = Read-Host -Prompt "✅ 本次流程执行完毕，是否继续处理新路径？(Y/N，默认Y)"
     # 统一转为大写，兼容大小写输入
     $continueInput = $continueInput.Trim().ToUpper()
 

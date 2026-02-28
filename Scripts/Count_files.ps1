@@ -40,10 +40,10 @@ do {
     }
 
     # 询问是否继续统计新路径
-    $continueChoice = Read-Host "`n是否需要统计新的路径？(Y/N，默认N)"
+    $continueChoice = Read-Host "`n是否需要统计新的路径？(Y/N，默认Y)"
 
-    # 统一转为小写，判断是否继续（仅输入Y/y时继续）
-    $isContinue = ($continueChoice.Trim().ToLower() -eq "y")
+    # 统一转为小写，判断是否继续（除非明确输入N，否则默认继续）
+    $isContinue = ($continueChoice.Trim().ToLower() -ne "n")
 
 } while ($isContinue)
 

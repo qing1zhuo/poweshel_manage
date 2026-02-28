@@ -241,8 +241,8 @@ function Edit-Script {
         $metaData = Get-ScriptMetaData
         $currentDesc = if ($metaData.$scriptName.Description) { $metaData.$scriptName.Description } else { "无介绍" }
         Write-Host "`n当前功能介绍: $currentDesc" -ForegroundColor White
-        $updateDesc = Read-Host "是否修改功能介绍？(Y/N，默认N)"
-        if ($updateDesc -eq 'Y' -or $updateDesc -eq 'y') {
+        $updateDesc = Read-Host "是否修改功能介绍？(Y/N，默认Y)"
+        if ($updateDesc -ne 'N' -and $updateDesc -ne 'n') {
             $newDesc = Read-Host "请输入新的功能介绍"
             if (-not [string]::IsNullOrEmpty($newDesc)) {
                 $metaData.$scriptName.Description = $newDesc
@@ -298,8 +298,8 @@ function Remove-Script {
         $scriptPath = $selectedScript.FullName
 
         # 二次确认
-        $confirm = Read-Host "⚠️ 确定要删除[$scriptName.ps1]吗？(Y/N，默认N)"
-        if ($confirm -ne 'Y' -and $confirm -ne 'y') {
+        $confirm = Read-Host "⚠️ 确定要删除[$scriptName.ps1]吗？(Y/N，默认Y)"
+        if ($confirm -eq 'N' -or $confirm -eq 'n') {
             Write-Host "✅ 已取消删除操作" -ForegroundColor Green
             Read-Host "按任意键返回菜单"
             return
@@ -375,8 +375,8 @@ function Rollback-ScriptVersion {
         $targetPath = "$ScriptRootPath\$scriptName.ps1"
 
         # 二次确认
-        $confirm = Read-Host "⚠️ 确定要回滚[$scriptName.ps1]到v$($selectedVersion.Version)版本吗？(Y/N，默认N)"
-        if ($confirm -ne 'Y' -and $confirm -ne 'y') {
+        $confirm = Read-Host "⚠️ 确定要回滚[$scriptName.ps1]到v$($selectedVersion.Version)版本吗？(Y/N，默认Y)"
+        if ($confirm -eq 'N' -or $confirm -eq 'n') {
             Write-Host "✅ 已取消回滚操作" -ForegroundColor Green
             Read-Host "按任意键返回菜单"
             return
@@ -479,8 +479,8 @@ function Run-Script {
         $scriptPath = $selectedScript.FullName
 
         # 二次确认（防止误运行危险脚本）
-        $confirm = Read-Host "`n⚠️ 确定要运行[$scriptName.ps1]吗？(Y/N，默认N)"
-        if ($confirm -ne 'Y' -and $confirm -ne 'y') {
+        $confirm = Read-Host "`n⚠️ 确定要运行[$scriptName.ps1]吗？(Y/N，默认Y)"
+        if ($confirm -eq 'N' -or $confirm -eq 'n') {
             Write-Host "✅ 已取消运行操作" -ForegroundColor Green
             Read-Host "按任意键返回菜单"
             return
