@@ -140,6 +140,69 @@ function Get-ScriptVersionList {
     }
 }
 
+# -------------------------- UI 辅助函数 --------------------------
+function Show-FormattedScriptList {
+    <# 以精美格式展示脚本列表，支持带序号选择模式 #>
+    param (
+        [Parameter(Mandatory=$false)]
+        [switch]$WithSelection, # 是否显示序号供选择
+        [Parameter(Mandatory=$false)]
+        [string]$Title = "📜 脚本详情列表"
+    )
+
+    try {
+        Write-Host "========================================================" -ForegroundColor Cyan
+        Write-Host "                $Title" -ForegroundColor Yellow
+        Write-Host "========================================================" -ForegroundColor Cyan
+        
+        $scriptFiles = Get-ChildItem -Path $ScriptRootPath -Filter "*.ps1" -File
+        if ($scriptFiles.Count -eq 0) {
+            Write-Host "❌ 暂无可用脚本！" -ForegroundColor Red
+            return $null
+        }
+
+        $metaData = Get-ScriptMetaData
+        for ($i=0; $i -lt $scriptFiles.Count; $i++) {
+            $scriptName = $scriptFiles[$i].Name -replace '\.ps1$',''
+            $scriptMeta = $metaData.$scriptName
+            
+            $desc = if ($scriptMeta -and $scriptMeta.Description) { $scriptMeta.Description } else { "无介绍" }
+            $version = if ($scriptMeta -and $scriptMeta.Version) { $scriptMeta.Version } else { "1" }
+            $createTime = if ($scriptMeta -and $scriptMeta.CreateTime) { $scriptMeta.CreateTime } else { "未知" }
+
+            Write-Host "--------------------------------------------------------" -ForegroundColor DarkGray
+            
+            # 如果是选择模式，显示序号
+            if ($WithSelection) {
+                Write-Host " [$($i+1)] " -NoNewline -ForegroundColor Green
+            }
+
+            Write-Host "📦 名称 : " -NoNewline -ForegroundColor Cyan
+            Write-Host "$scriptName.ps1" -ForegroundColor White
+            
+            Write-Host "     🔢 版本 : " -NoNewline -ForegroundColor Cyan
+            Write-Host "v$version" -ForegroundColor Green
+            
+            Write-Host "     🕒 时间 : " -NoNewline -ForegroundColor Cyan
+            Write-Host "$createTime" -ForegroundColor Gray
+            
+            Write-Host "     🔍 介绍 : " -NoNewline -ForegroundColor Cyan
+            Write-Host "$desc" -ForegroundColor Yellow
+        }
+        
+        Write-Host "--------------------------------------------------------" -ForegroundColor DarkGray
+        if ($WithSelection) {
+            Write-Host " 💡 提示: 输入序号开始操作，输入 0 或直接按回车返回主菜单" -ForegroundColor Gray
+        }
+        Write-Host "========================================================" -ForegroundColor Cyan
+        return $scriptFiles
+    }
+    catch {
+        Write-Host "❌ 展示列表失败: $_" -ForegroundColor Red
+        return $null
+    }
+}
+
 # -------------------------- 核心操作函数 --------------------------
 function New-Script {
     <# 新增脚本 #>
@@ -198,31 +261,22 @@ function Edit-Script {
     <# 修改脚本 #>
     try {
         Clear-Host
-        Write-Host "==================== 修改脚本 ====================" -ForegroundColor Cyan
-        
-        # 列出所有脚本
-        $scriptFiles = Get-ChildItem -Path $ScriptRootPath -Filter "*.ps1" -File
-        if ($scriptFiles.Count -eq 0) {
-            Write-Host "❌ 暂无可用脚本！" -ForegroundColor Red
+        $scriptFiles = Show-FormattedScriptList -Title "🛠️ 请选择要修改的脚本" -WithSelection
+        if ($null -eq $scriptFiles) {
             Read-Host "按任意键返回菜单"
             return
         }
 
-        # 展示脚本列表（循环外仅读取一次元数据）
-        Write-Host "`n📋 可选脚本列表:" -ForegroundColor Cyan
-        $metaData = Get-ScriptMetaData
-        for ($i=0; $i -lt $scriptFiles.Count; $i++) {
-            $scriptName = $scriptFiles[$i].Name -replace '\.ps1$',''
-            $scriptMeta = $metaData.$scriptName
-            $desc = if ($scriptMeta -and $scriptMeta.Description) { $scriptMeta.Description } else { "无介绍" }
-            Write-Host "  $($i+1). $scriptName.ps1 - 介绍: $desc" -ForegroundColor White
-        }
-
         # 选择要修改的脚本
         do {
-            $choice = Read-Host "`n请输入要修改的脚本序号（1-$($scriptFiles.Count)）"
+            $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
+            if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                Write-Host "✅ 已取消修改操作" -ForegroundColor Green
+                Read-Host "按任意键返回菜单"
+                return
+            }
             if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                Write-Host "❌ 输入无效，请输入1-$($scriptFiles.Count)之间的数字！" -ForegroundColor Red
+                Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
             }
         } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -268,28 +322,22 @@ function Remove-Script {
     <# 删除脚本 #>
     try {
         Clear-Host
-        Write-Host "==================== 删除脚本 ====================" -ForegroundColor Cyan
-        
-        # 列出所有脚本
-        $scriptFiles = Get-ChildItem -Path $ScriptRootPath -Filter "*.ps1" -File
-        if ($scriptFiles.Count -eq 0) {
-            Write-Host "❌ 暂无可用脚本！" -ForegroundColor Red
+        $scriptFiles = Show-FormattedScriptList -Title "🗑️ 请选择要删除的脚本" -WithSelection
+        if ($null -eq $scriptFiles) {
             Read-Host "按任意键返回菜单"
             return
         }
 
-        # 展示脚本列表
-        Write-Host "`n📋 可选脚本列表:" -ForegroundColor Cyan
-        for ($i=0; $i -lt $scriptFiles.Count; $i++) {
-            $scriptName = $scriptFiles[$i].Name -replace '\.ps1$',''
-            Write-Host "  $($i+1). $scriptName.ps1" -ForegroundColor White
-        }
-
         # 选择要删除的脚本
         do {
-            $choice = Read-Host "`n请输入要删除的脚本序号（1-$($scriptFiles.Count)）"
+            $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
+            if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                Write-Host "✅ 已取消删除操作" -ForegroundColor Green
+                Read-Host "按任意键返回菜单"
+                return
+            }
             if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                Write-Host "❌ 输入无效，请输入1-$($scriptFiles.Count)之间的数字！" -ForegroundColor Red
+                Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
             }
         } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -327,28 +375,22 @@ function Rollback-ScriptVersion {
     <# 版本回滚 #>
     try {
         Clear-Host
-        Write-Host "==================== 版本回滚 ====================" -ForegroundColor Cyan
-        
-        # 列出所有脚本
-        $scriptFiles = Get-ChildItem -Path $ScriptRootPath -Filter "*.ps1" -File
-        if ($scriptFiles.Count -eq 0) {
-            Write-Host "❌ 暂无可用脚本！" -ForegroundColor Red
+        $scriptFiles = Show-FormattedScriptList -Title "🔄 请选择要回滚的脚本" -WithSelection
+        if ($null -eq $scriptFiles) {
             Read-Host "按任意键返回菜单"
             return
         }
 
-        # 展示脚本列表
-        Write-Host "`n📋 可选脚本列表:" -ForegroundColor Cyan
-        for ($i=0; $i -lt $scriptFiles.Count; $i++) {
-            $scriptName = $scriptFiles[$i].Name -replace '\.ps1$',''
-            Write-Host "  $($i+1). $scriptName.ps1" -ForegroundColor White
-        }
-
         # 选择要回滚的脚本
         do {
-            $choice = Read-Host "`n请输入要回滚的脚本序号（1-$($scriptFiles.Count)）"
+            $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
+            if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                Write-Host "✅ 已取消回滚操作" -ForegroundColor Green
+                Read-Host "按任意键返回菜单"
+                return
+            }
             if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                Write-Host "❌ 输入无效，请输入1-$($scriptFiles.Count)之间的数字！" -ForegroundColor Red
+                Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
             }
         } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -400,40 +442,11 @@ function Show-ScriptList {
     <# 查看脚本列表及介绍 #>
     try {
         Clear-Host
-        Write-Host "==================== 脚本列表 ====================" -ForegroundColor Cyan
-        
-        # 列出所有脚本
-        $scriptFiles = Get-ChildItem -Path $ScriptRootPath -Filter "*.ps1" -File
-        if ($scriptFiles.Count -eq 0) {
-            Write-Host "❌ 暂无可用脚本！" -ForegroundColor Red
+        $scriptFiles = Show-FormattedScriptList -Title "📜 脚本详情列表"
+        if ($null -eq $scriptFiles) {
             Read-Host "按任意键返回菜单"
             return
         }
-
-        # 展示脚本信息（循环外仅读取一次元数据）
-        Write-Host "`n📋 脚本详情列表:" -ForegroundColor Cyan
-        $metaData = Get-ScriptMetaData
-        foreach ($scriptFile in $scriptFiles) {
-            $scriptName = $scriptFile.Name -replace '\.ps1$',''
-            
-            # 兼容PS5.1的安全取值
-            $scriptMeta = $metaData.$scriptName
-            if (-not $scriptMeta) {
-                $desc = "无介绍"
-                $version = "1"
-                $createTime = "未知"
-            } else {
-                $desc = if ($scriptMeta.Description) { $scriptMeta.Description } else { "无介绍" }
-                $version = if ($scriptMeta.Version) { $scriptMeta.Version } else { "1" }
-                $createTime = if ($scriptMeta.CreateTime) { $scriptMeta.CreateTime } else { "未知" }
-            }
-            
-            Write-Host "`n📄 脚本名: $scriptName.ps1" -ForegroundColor White
-            Write-Host "   🔍 功能介绍: $desc" -ForegroundColor Gray
-            Write-Host "   🔢 当前版本: v$version" -ForegroundColor Gray
-            Write-Host "   🕒 创建时间: $createTime" -ForegroundColor Gray
-        }
-
         Read-Host "`n按任意键返回菜单"
     }
     catch {
@@ -446,31 +459,21 @@ function Run-Script {
     <# 运行脚本 - 新增核心功能 #>
     try {
         Clear-Host
-        Write-Host "==================== 运行脚本 ====================" -ForegroundColor Cyan
-        
-        # 列出所有脚本
-        $scriptFiles = Get-ChildItem -Path $ScriptRootPath -Filter "*.ps1" -File
-        if ($scriptFiles.Count -eq 0) {
-            Write-Host "❌ 暂无可用脚本！" -ForegroundColor Red
+        $scriptFiles = Show-FormattedScriptList -Title "🚀 请选择要运行的脚本" -WithSelection
+        if ($null -eq $scriptFiles) {
             Read-Host "按任意键返回菜单"
             return
         }
 
-        # 展示脚本列表（带介绍，循环外读元数据）
-        Write-Host "`n📋 可运行脚本列表:" -ForegroundColor Cyan
-        $metaData = Get-ScriptMetaData
-        for ($i=0; $i -lt $scriptFiles.Count; $i++) {
-            $scriptName = $scriptFiles[$i].Name -replace '\.ps1$',''
-            $scriptMeta = $metaData.$scriptName
-            $desc = if ($scriptMeta -and $scriptMeta.Description) { $scriptMeta.Description } else { "无介绍" }
-            Write-Host "  $($i+1). $scriptName.ps1 - 介绍: $desc" -ForegroundColor White
-        }
-
         # 选择要运行的脚本
         do {
-            $choice = Read-Host "`n请输入要运行的脚本序号（1-$($scriptFiles.Count)）"
+            $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
+            if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                Write-Host "✅ 已返回主菜单" -ForegroundColor Green
+                return
+            }
             if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                Write-Host "❌ 输入无效，请输入1-$($scriptFiles.Count)之间的数字！" -ForegroundColor Red
+                Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
             }
         } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
