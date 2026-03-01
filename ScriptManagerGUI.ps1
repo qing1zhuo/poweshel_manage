@@ -77,32 +77,41 @@ $xaml = @"
             </ListView>
         </DockPanel>
 
-        <!-- 右侧操作区 -->
-        <StackPanel Grid.Column="1">
-            <TextBlock Text="🛠️ 脚本操作" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" Foreground="#333"/>
-            
-            <Border Background="White" BorderThickness="1" BorderBrush="#DDD" Padding="10" CornerRadius="5">
-                <StackPanel>
-                    <Button x:Name="BtnRun" Content="🚀 运行脚本" Height="40" Margin="0,0,0,10" Background="#4CAF50" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
-                    <Button x:Name="BtnEdit" Content="📝 修改脚本" Height="40" Margin="0,0,0,10" Background="#2196F3" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
-                    <Button x:Name="BtnRollback" Content="🔄 版本回滚" Height="40" Margin="0,0,0,10" Background="#FF9800" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
-                    <Button x:Name="BtnDelete" Content="🗑️ 删除脚本" Height="40" Margin="0,0,0,20" Background="#F44336" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
-                    
-                    <Separator Margin="0,0,0,20"/>
-                    
-                    <Button x:Name="BtnAdd" Content="✨ 新增脚本" Height="40" Margin="0,0,0,10" Background="#9C27B0" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
-                    <Button x:Name="BtnRefresh" Content="🔃 刷新列表" Height="40" Background="#757575" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
-                </StackPanel>
-            </Border>
+        <!-- 右侧操作区与详情区 -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <!-- 详情展示 -->
-            <TextBlock Text="🔍 脚本详情" FontSize="16" FontWeight="Bold" Margin="0,20,0,5" Foreground="#333"/>
-            <Border Background="#E1F5FE" BorderThickness="1" BorderBrush="#B3E5FC" Padding="10" CornerRadius="5" Height="120">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock x:Name="TxtDetail" TextWrapping="Wrap" Text="请选择一个脚本以查看详情..." Foreground="#01579B"/>
-                </ScrollViewer>
-            </Border>
-        </StackPanel>
+            <!-- 操作区 -->
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="🛠️ 脚本操作" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" Foreground="#333"/>
+                <Border Background="White" BorderThickness="1" BorderBrush="#DDD" Padding="10" CornerRadius="5">
+                    <StackPanel>
+                        <Button x:Name="BtnRun" Content="🚀 运行脚本" Height="40" Margin="0,0,0,10" Background="#4CAF50" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                        <Button x:Name="BtnEdit" Content="📝 修改脚本" Height="40" Margin="0,0,0,10" Background="#2196F3" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                        <Button x:Name="BtnRollback" Content="🔄 版本回滚" Height="40" Margin="0,0,0,10" Background="#FF9800" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                        <Button x:Name="BtnDelete" Content="🗑️ 删除脚本" Height="40" Margin="0,0,0,20" Background="#F44336" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                        
+                        <Separator Margin="0,0,0,20"/>
+                        
+                        <Button x:Name="BtnAdd" Content="✨ 新增脚本" Height="40" Margin="0,0,0,10" Background="#9C27B0" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                        <Button x:Name="BtnRefresh" Content="🔃 刷新列表" Height="40" Background="#757575" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- 详情展示 (自动填充剩余空间) -->
+            <DockPanel Grid.Row="1" Margin="0,15,0,0">
+                <TextBlock DockPanel.Dock="Top" Text="🔍 脚本详情" FontSize="16" FontWeight="Bold" Margin="0,0,0,5" Foreground="#333"/>
+                <Border Background="#E1F5FE" BorderThickness="1" BorderBrush="#B3E5FC" Padding="10" CornerRadius="5">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="TxtDetail" TextWrapping="Wrap" Text="请选择一个脚本以查看详情..." Foreground="#01579B"/>
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+        </Grid>
     </Grid>
 </Window>
 "@
