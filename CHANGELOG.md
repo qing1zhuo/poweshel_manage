@@ -46,6 +46,7 @@
 - **参数化函数改造**：重构了 `Edit-Script`, `Remove-Script`, `Rollback-ScriptVersion`, `Run-Script` 等核心函数，支持直接接收脚本对象参数，消除了冗余的选择步骤。
 
 ### 🎨 UI 与交互优化
+- **控制台窗口自动隐藏**：在 `ScriptManagerGUI.ps1` 启动时通过 P/Invoke 调用系统 API 自动隐藏背景 PowerShell 控制台，提供更纯净的图形化体验。
 - **详情区域扩容**：重构了 `ScriptManagerGUI.ps1` 的右侧布局，将脚本详情区域由固定高度改为自动填充剩余空间，大幅提升了长描述脚本的可读性。
 - **布局微调**：优化了控件间的间距，使整体界面更具呼吸感。
 
