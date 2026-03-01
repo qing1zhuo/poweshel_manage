@@ -181,8 +181,8 @@ $btnRun.Add_Click({
     $selected = $scriptListView.SelectedItem
     if (-not $selected) { [System.Windows.MessageBox]::Show("请先选择一个脚本！"); return }
     
-    # 在新窗口中运行以保持交互
-    Start-Process powershell.exe -ArgumentList "-NoExit", "-File", "`"$($selected.FullPath)`""
+    # 在新窗口中运行，移除 -NoExit 以便在脚本结束后自动关闭窗口
+    Start-Process powershell.exe -ArgumentList "-File", "`"$($selected.FullPath)`""
 })
 
 # 修改
