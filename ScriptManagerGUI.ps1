@@ -8,18 +8,12 @@
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Microsoft.VisualBasic
 
-# -------------------------- 隐藏控制台窗口 --------------------------
-# 使用更可靠的 GetConsoleWindow API 获取当前控制台窗口句柄并将其隐藏
-$definition = @"
-    [DllImport("kernel32.dll")]
-    public static extern IntPtr GetConsoleWindow();
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-"@
-$win32 = Add-Type -MemberDefinition $definition -Name "Win32Utils" -Namespace "Win32" -PassThru
-$handle = $win32::GetConsoleWindow()
-if ($handle -ne [IntPtr]::Zero) {
-    $win32::ShowWindow($handle, 0) # 0 = SW_HIDE
+# -------------------------- 彻底隐藏/关闭控制台窗口 --------------------------
+# 如果是从控制台启动的，启动一个后台进程运行本脚本，然后当前控制台进程立即退出
+if (-not $env:PS_GUI_RUNNING) {
+    $env:PS_GUI_RUNNING = "true"
+    Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden", "-File", "`"$PSCommandPath`""
+    exit
 }
 
 # -------------------------- 配置区 --------------------------
