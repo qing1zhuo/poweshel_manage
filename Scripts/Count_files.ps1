@@ -10,6 +10,26 @@
 # 解决PowerShell中文乱码问题
 chcp 65001 | Out-Null
 
+# 定义颜色常量
+$COLOR_INFO = "Cyan"
+$COLOR_SUCCESS = "Green"
+$COLOR_ERROR = "Red"
+$COLOR_TITLE = "Yellow"
+
+# ===================== 脚本启动：打印核心功能说明 ======================
+Write-Host "`n=====================================" -ForegroundColor $COLOR_TITLE
+Write-Host "📊 多功能文件统计脚本 (v4.1)" -ForegroundColor $COLOR_TITLE
+Write-Host "=====================================" -ForegroundColor $COLOR_TITLE
+Write-Host "🔧 核心功能：" -ForegroundColor $COLOR_INFO
+Write-Host "  1. 智能分类统计：内置 PDF、Office 文档、图片、压缩包等常见类型映射" -ForegroundColor $COLOR_INFO
+Write-Host "  2. 自定义扩展名：支持用户输入任意扩展名进行精准统计" -ForegroundColor $COLOR_INFO
+Write-Host "  3. 递归扫描：自动检索指定文件夹及其所有子文件夹中的文件" -ForegroundColor $COLOR_INFO
+Write-Host "  4. 结果可视化：按文件数量降序排列，清晰展示各类型占比" -ForegroundColor $COLOR_INFO
+Write-Host "  5. 持续作业模式：支持循环路径输入，满足大批量处理需求" -ForegroundColor $COLOR_INFO
+Write-Host "⚙️  运行依赖：" -ForegroundColor $COLOR_INFO
+Write-Host "  1. 扫描引擎：Windows PowerShell 原生支持 (Get-ChildItem)" -ForegroundColor $COLOR_INFO
+Write-Host "=====================================`n" -ForegroundColor $COLOR_TITLE
+
 # 定义预设的类型映射（支持简写）
 $TypeMap = @{
     "pdf" = @(".pdf")

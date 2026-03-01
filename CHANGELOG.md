@@ -7,6 +7,18 @@
 
 ---
 
+## [2026-03-01] - 规范升级：全系脚本标准化说明
+
+### ✨ 脚本功能增强
+- **全系脚本标准化头部说明**：为 [Count_files.ps1](file:///D:/powershell_manage/Scripts/Count_files.ps1) 和 [Push-ToGitHub.ps1](file:///D:/powershell_manage/Scripts/Push-ToGitHub.ps1) 添加了精美的启动说明。
+- **功能与依赖公示**：现在所有脚本启动时都会清晰展示其“核心功能”与“运行依赖”，显著提升了用户体验和容错性。
+
+### 📄 规范更新 (CONTRIBUTING.md)
+- **强制脚本自描述规范**：在交互设计规范中新增了对“脚本功能与依赖展示”的要求。
+- **颜色代码标准**：推荐在脚本中使用统一的颜色代码（如 Cyan 用于信息，Yellow 用于标题）。
+
+---
+
 ## [2026-03-01] - 交互革命：引入图形化界面 (GUI)
 
 ### ✨ 新增功能 (ScriptManagerGUI.ps1)

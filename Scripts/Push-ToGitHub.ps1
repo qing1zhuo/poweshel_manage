@@ -30,6 +30,29 @@ param (
     [string]$CommitMessage = "Initial commit via script"
 )
 
+# 解决PowerShell中文乱码问题
+chcp 65001 | Out-Null
+
+# 定义颜色常量
+$COLOR_INFO = "Cyan"
+$COLOR_SUCCESS = "Green"
+$COLOR_ERROR = "Red"
+$COLOR_TITLE = "Yellow"
+
+# ===================== 脚本启动：打印核心功能说明 ======================
+Write-Host "`n=====================================" -ForegroundColor $COLOR_TITLE
+Write-Host "📤 GitHub 一键同步工具" -ForegroundColor $COLOR_TITLE
+Write-Host "=====================================" -ForegroundColor $COLOR_TITLE
+Write-Host "🔧 核心功能：" -ForegroundColor $COLOR_INFO
+Write-Host "  1. Git 自动化：全自动执行 git init、add、commit 操作" -ForegroundColor $COLOR_INFO
+Write-Host "  2. 智能分支管理：支持自动创建并切换至 main 主分支" -ForegroundColor $COLOR_INFO
+Write-Host "  3. 远程库同步：一键添加或更新 GitHub 远程仓库 URL" -ForegroundColor $COLOR_INFO
+Write-Host "  4. 静默推送：自动化处理推送至 GitHub 仓库的完整流程" -ForegroundColor $COLOR_INFO
+Write-Host "  5. 持续作业模式：支持处理多个项目路径，实现批量同步" -ForegroundColor $COLOR_INFO
+Write-Host "⚙️  运行依赖：" -ForegroundColor $COLOR_INFO
+Write-Host "  1. 核心引擎：Git for Windows (需安装并在 PATH 中可用)" -ForegroundColor $COLOR_INFO
+Write-Host "=====================================`n" -ForegroundColor $COLOR_TITLE
+
 do {
     # 如果没有通过参数传递路径，则在此询问
     if ([string]::IsNullOrWhiteSpace($Path)) {
