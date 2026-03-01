@@ -160,7 +160,7 @@ function Show-FormattedScriptList {
         
         # 即使没有脚本，也显示 "新增脚本" 选项
         if ($WithSelection) {
-            Write-Host " [N] " -NoNewline -ForegroundColor Green
+            Write-Host " [A] " -NoNewline -ForegroundColor Green
             Write-Host "✨ 新增脚本" -ForegroundColor White
         }
 
@@ -201,7 +201,7 @@ function Show-FormattedScriptList {
         
         Write-Host "--------------------------------------------------------" -ForegroundColor DarkGray
         if ($WithSelection) {
-            Write-Host " 💡 提示: 输入序号开始操作，输入 N 新增脚本，输入 0 退出工具" -ForegroundColor Gray
+            Write-Host " 💡 提示: 输入序号开始操作，输入 A 新增脚本，输入 N 退出工具" -ForegroundColor Gray
         }
         Write-Host "========================================================" -ForegroundColor Cyan
         return ,$scriptFiles # 使用逗号确保即使只有一个元素也作为数组返回
@@ -230,7 +230,7 @@ function Show-ScriptSubMenu {
         Write-Host "  2. 📝 修改脚本 (含自动备份)"
         Write-Host "  3. 🔄 版本回滚"
         Write-Host "  4. 🗑️ 删除脚本"
-        Write-Host "  0. ⬅️ 返回列表"
+        Write-Host "  N. ⬅️ 返回列表"
         Write-Host "========================================================" -ForegroundColor Cyan
         
         $choice = Read-Host "`n请选择操作序号"
@@ -244,9 +244,10 @@ function Show-ScriptSubMenu {
                     return # 如果脚本被删除了，直接返回主列表
                 }
             }
-            "0" { return }
+            "N" { return }
+            "n" { return }
             default {
-                Write-Host "❌ 输入无效，请输入0-4之间的数字！" -ForegroundColor Red
+                Write-Host "❌ 输入无效，请输入1-4之间的数字或 N 返回！" -ForegroundColor Red
                 Read-Host "按任意键重试"
             }
         }
@@ -325,14 +326,14 @@ function Edit-Script {
 
             # 选择要修改的脚本
             do {
-                $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
-                if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                $choice = Read-Host "`n请输入脚本序号（或输入 N 返回）"
+                if ($choice -eq "N" -or $choice -eq "n") {
                     Write-Host "✅ 已取消修改操作" -ForegroundColor Green
                     Read-Host "按任意键返回菜单"
                     return
                 }
                 if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
+                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字或 N 返回！" -ForegroundColor Red
                 }
             } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -394,14 +395,14 @@ function Remove-Script {
 
             # 选择要删除的脚本
             do {
-                $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
-                if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                $choice = Read-Host "`n请输入脚本序号（或输入 N 返回）"
+                if ($choice -eq "N" -or $choice -eq "n") {
                     Write-Host "✅ 已取消删除操作" -ForegroundColor Green
                     Read-Host "按任意键返回菜单"
                     return $false
                 }
                 if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
+                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字或 N 返回！" -ForegroundColor Red
                 }
             } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -459,14 +460,14 @@ function Rollback-ScriptVersion {
 
             # 选择要回滚的脚本
             do {
-                $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
-                if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                $choice = Read-Host "`n请输入脚本序号（或输入 N 返回）"
+                if ($choice -eq "N" -or $choice -eq "n") {
                     Write-Host "✅ 已取消回滚操作" -ForegroundColor Green
                     Read-Host "按任意键返回菜单"
                     return
                 }
                 if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
+                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字或 N 返回！" -ForegroundColor Red
                 }
             } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -534,13 +535,13 @@ function Run-Script {
 
             # 选择要运行的脚本
             do {
-                $choice = Read-Host "`n请输入脚本序号（或输入0返回）"
-                if ([string]::IsNullOrWhiteSpace($choice) -or $choice -eq "0") {
+                $choice = Read-Host "`n请输入脚本序号（或输入 N 返回）"
+                if ($choice -eq "N" -or $choice -eq "n") {
                     Write-Host "✅ 已返回主菜单" -ForegroundColor Green
                     return
                 }
                 if (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count) {
-                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字！" -ForegroundColor Red
+                    Write-Host "❌ 输入无效，请输入 1-$($scriptFiles.Count) 之间的数字或 N 返回！" -ForegroundColor Red
                 }
             } while (-not [int]::TryParse($choice, [ref]$null) -or $choice -lt 1 -or $choice -gt $scriptFiles.Count)
 
@@ -583,11 +584,11 @@ while ($true) {
     $index = 0
     
     # 2. 处理用户选择
-    if ($choice -eq "0") {
+    if ($choice -eq "N" -or $choice -eq "n") {
         Write-Host "👋 感谢使用，再见！" -ForegroundColor Green
         exit 0
     }
-    elseif ($choice -eq "N" -or $choice -eq "n") {
+    elseif ($choice -eq "A" -or $choice -eq "a") {
         New-Script
     }
     elseif ($choice -match '^\d+$') {
@@ -603,7 +604,7 @@ while ($true) {
         }
     }
     else {
-        Write-Host "❌ 输入无效，请输入数字序号、N 或 0！" -ForegroundColor Red
+        Write-Host "❌ 输入无效，请输入数字序号、A 或 N！" -ForegroundColor Red
         Read-Host "按任意键重试"
     }
 }
