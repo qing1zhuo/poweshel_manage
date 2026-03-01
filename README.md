@@ -6,7 +6,8 @@
 
 ## 📂 项目结构
 
-- `ScriptManager.ps1`: **管理工具入口**。运行此脚本即可进入交互式菜单。
+- `ScriptManager.ps1`: **管理工具入口 (CLI)**。运行此脚本即可进入交互式菜单。
+- `ScriptManagerGUI.ps1`: **管理工具入口 (GUI)**。基于 WPF 的图形化界面，操作更直观。
 - `Scripts/`: 脚本存放目录。所有的 `.ps1` 脚本都存放在这里。
 - `VersionBackup/`: 版本备份目录。当你修改脚本时，旧版本会自动备份到这里。
 - `ScriptMetaData.json`: 元数据文件。记录脚本的描述、版本号和创建时间。
