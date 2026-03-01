@@ -60,6 +60,19 @@
 - 关键操作（文件读写、网络请求等）必须包裹在 `try { ... } catch { ... }` 块中。
 - 使用 `Write-Host -ForegroundColor Red` 或 `Write-Error` 输出清晰的错误信息。
 
+### 2.4 交互设计规范 (Interaction Standards)
+- **循环执行机制**：为了提升效率，所有业务脚本必须包含 `do...while` 循环逻辑。
+- **运行完毕询问**：脚本执行完成后，必须询问用户“是否继续运行/统计新路径？(Y/N)”。
+- **默认行为**：确认提示应默认设为 **Y**（即直接按 Enter 视为继续），除非用户明确输入 `N`。
+- **示例代码**：
+  ```powershell
+  do {
+      # 核心逻辑...
+      $continueChoice = Read-Host "`n是否继续操作？(Y/N，默认Y)"
+      $isContinue = ($continueChoice.Trim().ToLower() -ne "n")
+  } while ($isContinue)
+  ```
+
 ---
 
 ## 📑 3. 文档更新规范
@@ -77,6 +90,7 @@
 
 ## ✅ 4. 发布前自检清单
 - [ ] 脚本是否能正常运行且无报错？
+- [ ] 脚本是否包含循环运行逻辑（询问是否再次运行）？
 - [ ] 是否已通过 `ScriptManager.ps1` 进行修改（以生成备份）？
 - [ ] `CHANGELOG.md` 是否已记录本次改动？
 - [ ] `README.md` 中的描述是否与代码功能一致？
