@@ -13,5 +13,10 @@
                         "Description": "将指定文件夹内容推送到 GitHub 仓库（智能分支推送 HEAD:main）",
                         "Version": 3,
                         "CreateTime": "2026-03-02 10:30:00"
+                    },
+    "Expand-Archives": {
+                        "Description": "批量解压目录下压缩包并删除源包（ZIP；7-Zip 支持 7Z/RAR；修复递归参数绑定）",
+                        "Version": 1.2,
+                        "CreateTime": "2026-03-02 12:00:00"
                     }
 }

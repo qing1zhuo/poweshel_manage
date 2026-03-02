@@ -7,6 +7,25 @@
 
 ---
 
+## [2026-03-02] - 新增脚本：Expand-Archives.ps1
+
+### ✨ 新增功能
+- **Expand-Archives.ps1**：输入目录路径，批量解压该目录下的压缩包到同名文件夹，解压成功后自动删除源包。
+- **格式支持**：默认支持 ZIP；如检测到 7-Zip，则同时支持 .7z 与 .rar（兼容性优化，采用标准 `7z x ARCHIVE -oDEST -y` 调用）。
+- **交互与体验**：支持选择是否递归子目录；操作完成提供成功/失败统计；遵循默认确认为 Y 的交互规范。
+- **版本管理**：脚本已登记至 ScriptMetaData.json，版本 v1。
+
+---
+
+## [2026-03-02] - 修复：Expand-Archives.ps1 参数绑定错误
+
+### 🛠️ 故障修复
+- **Get-ChildItem 参数传递**：修复了使用 `@($searchOption)` 造成的参数绑定错误（被误解析为 `-Filter`），在 PowerShell 5.1 下报错 `Cannot convert 'System.Object[]' to the type 'System.String'`。现改为基于哈希表的参数拼接：`Get-ChildItem @gciParams` 并按需添加 `-Recurse`。
+- **7-Zip 调用健壮性**：统一以 `$sevenZipPath` 调用外部 `7z.exe`，兼容环境 PATH 差异。
+- **版本**：Expand-Archives.ps1 升级至 v1.2。
+
+---
+
 ## [2026-03-02] - 修复与增强：Push-ToGitHub.ps1 分支兼容性优化
 
 ### 🛠️ 故障修复 (Push-ToGitHub.ps1)
