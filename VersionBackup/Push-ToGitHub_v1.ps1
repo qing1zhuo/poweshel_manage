@@ -88,21 +88,7 @@ do {
 
                 # 5. 提交更改
                 Write-Host "正在提交更改..." -ForegroundColor Cyan
-                
-                # 询问是否手动编写备注
-                $customCommit = Read-Host "`n是否手动输入提交备注？(Y/N，默认N)"
-                if ($customCommit.Trim().ToLower() -eq "y") {
-                    $finalCommitMessage = Read-Host "请输入备注内容"
-                    if ([string]::IsNullOrWhiteSpace($finalCommitMessage)) {
-                        $finalCommitMessage = $CommitMessage
-                        Write-Host "检测到备注为空，将使用默认备注: $CommitMessage" -ForegroundColor Yellow
-                    }
-                } else {
-                    $finalCommitMessage = $CommitMessage
-                    Write-Host "使用默认备注: $CommitMessage" -ForegroundColor Gray
-                }
-
-                git commit -m $finalCommitMessage
+                git commit -m $CommitMessage
 
                 # 6. 处理远程仓库
                 $tempRemoteUrl = $RemoteUrl
