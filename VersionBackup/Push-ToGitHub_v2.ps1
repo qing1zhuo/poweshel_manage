@@ -128,9 +128,8 @@ do {
                     }
 
                     # 7. 推送代码
-                    $currentBranch = git rev-parse --abbrev-ref HEAD
-                    Write-Host "正在将本地分支 [$currentBranch] 推送至 GitHub (remote: main 分支)..." -ForegroundColor Cyan
-                    git push -u origin HEAD:main
+                    Write-Host "正在推送至 GitHub (main 分支)..." -ForegroundColor Cyan
+                    git push -u origin main
                     Write-Host "`n操作成功！代码已同步至 GitHub。" -ForegroundColor Green
                 } else {
                     Write-Warning "未提供远程 URL，脚本仅在本地提交。"

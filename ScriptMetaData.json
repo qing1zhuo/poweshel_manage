@@ -10,8 +10,8 @@
                         "CreateTime":  "2026-02-24 18:19:39"
                     },
     "Push-ToGitHub": {
-                        "Description": "将指定文件夹内容推送到 GitHub 仓库（支持自定义提交备注）",
-                        "Version": 2,
-                        "CreateTime": "2026-03-02 10:00:00"
+                        "Description": "将指定文件夹内容推送到 GitHub 仓库（智能分支推送 HEAD:main）",
+                        "Version": 3,
+                        "CreateTime": "2026-03-02 10:30:00"
                     }
 }
