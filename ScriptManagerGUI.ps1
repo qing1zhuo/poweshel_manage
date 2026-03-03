@@ -8,13 +8,21 @@
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, Microsoft.VisualBasic
 
-# -------------------------- 彻底隐藏/关闭控制台窗口 --------------------------
-# 如果是从控制台启动的，启动一个后台进程运行本脚本，然后当前控制台进程立即退出
-if (-not $env:PS_GUI_RUNNING) {
-    $env:PS_GUI_RUNNING = "true"
-    Start-Process powershell.exe -ArgumentList "-WindowStyle Hidden", "-File", "`"$PSCommandPath`""
-    exit
-}
+# -------------------------- 静默隐藏控制台窗口 --------------------------
+try {
+    if (-not ("Win32.Win32ShowWindowAsync" -as [type])) {
+        Add-Type -MemberDefinition @'
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetConsoleWindow();
+'@ -Name "Win32ShowWindowAsync" -Namespace "Win32" -ErrorAction SilentlyContinue
+    }
+    $hwnd = [Win32.Win32ShowWindowAsync]::GetConsoleWindow()
+    if ($hwnd -ne 0) {
+        [Win32.Win32ShowWindowAsync]::ShowWindowAsync($hwnd, 0) | Out-Null # 0 = SW_HIDE
+    }
+} catch {}
 
 # -------------------------- 配置区 --------------------------
 $ScriptRootPath = "D:\powershell_manage\Scripts"
