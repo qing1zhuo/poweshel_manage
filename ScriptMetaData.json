@@ -1,4 +1,4 @@
-{
+﻿{
     "Zip_to_img_to_pdf":  {
                               "Description":  "全自动化文档数字化流水线：集成 ZIP 批量解压、图像提取与高质 PDF 合成，支持自动清理临时文件",
                               "Version":  3.1,
@@ -9,14 +9,24 @@
                         "Version":  4.1,
                         "CreateTime":  "2026-02-24 18:19:39"
                     },
-    "Push-ToGitHub": {
-                        "Description": "将指定文件夹内容推送到 GitHub 仓库（智能分支推送 HEAD:main）",
-                        "Version": 3,
-                        "CreateTime": "2026-03-02 10:30:00"
-                    },
-    "Expand-Archives": {
-                        "Description": "批量解压目录下压缩包并删除源包（ZIP；7-Zip 支持 7Z/RAR；修复递归参数绑定）",
-                        "Version": 1.2,
-                        "CreateTime": "2026-03-02 12:00:00"
-                    }
+    "Push-ToGitHub":  {
+                          "Description":  "将指定文件夹内容推送到 GitHub 仓库（智能分支推送 HEAD:main）",
+                          "Version":  3,
+                          "CreateTime":  "2026-03-02 10:30:00"
+                      },
+    "Expand-Archives":  {
+                            "Description":  "批量解压目录下压缩包并删除源包（ZIP；7-Zip 支持 7Z/RAR；修复递归参数绑定）",
+                            "Version":  1.2,
+                            "CreateTime":  "2026-03-02 12:00:00"
+                        },
+    "Count-TextWords":  {
+                            "Description":  "该 PowerShell 脚本可读取指定 TXT 文本文件，精准过滤标点、空格、换行符等无关字符后，分别统计文件内汉字数量与英文单词数量",
+                            "Version":  2,
+                            "CreateTime":  "2026-03-06 19:44:45"
+                        },
+    "Merge-ImagesToPdf":  {
+                            "Description":  "将指定文件夹下的所有图片按名称字典序合成为一个 PDF 文件，并以首张图片命名",
+                            "Version":  2,
+                            "CreateTime":  "2026-04-10 10:00:00"
+                        }
 }

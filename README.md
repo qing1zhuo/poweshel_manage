@@ -52,6 +52,10 @@
 - **功能**：全自动化文档数字化流水线。
 - **特点**：集成 ZIP 批量解压、图像提取与高质 PDF 合成。支持任务完成后自动清理原压缩包及临时文件夹，保持工作区整洁。需依赖 ImageMagick 7+。
 
+### 4. 🖼️ [Merge-ImagesToPdf.ps1](file:///d:/powershell_manage/Scripts/Merge-ImagesToPdf.ps1)
+- **功能**：将指定路径下的所有图片合成为一个 PDF。
+- **特点**：支持多种格式，按字典序排列图片，并以第一张图片的名字作为 PDF 文件名。需依赖 ImageMagick 7+。
+
 ---
 
 ## ⚠️ 注意事项
