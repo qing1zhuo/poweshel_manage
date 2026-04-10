@@ -3,8 +3,8 @@ import os
 import subprocess
 import threading
 import time
-from src.config import SCRIPT_ROOT, BACKUP_ROOT, METADATA_FILE
-from src.logic import ScriptCore
+from src.config.settings import SCRIPT_ROOT, BACKUP_ROOT, METADATA_FILE
+from src.core.script_logic import ScriptCore
 from src.ui.dialogs import show_rollback_dialog, show_add_script_dialog
 
 class ScriptManagerApp(ctk.CTk):

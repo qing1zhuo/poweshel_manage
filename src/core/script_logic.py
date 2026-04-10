@@ -3,7 +3,7 @@ import json
 import shutil
 import re
 from datetime import datetime
-from src.config import SCRIPT_ROOT, BACKUP_ROOT, METADATA_FILE
+from src.config.settings import SCRIPT_ROOT, BACKUP_ROOT, METADATA_FILE
 
 class ScriptCore:
     def __init__(self, logger_callback=None):

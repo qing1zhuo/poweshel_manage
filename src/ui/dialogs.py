@@ -4,7 +4,7 @@ import subprocess
 import shutil
 import re
 import json
-from src.config import SCRIPT_ROOT, BACKUP_ROOT, METADATA_FILE
+from src.config.settings import SCRIPT_ROOT, BACKUP_ROOT, METADATA_FILE
 
 def show_rollback_dialog(parent, script_name, core, refresh_callback):
     backups = core.get_backups(script_name)

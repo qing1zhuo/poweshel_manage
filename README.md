@@ -1,4 +1,4 @@
-# 🛠️ PowerShell 脚本管理工具 (v2.0)
+# 🛠️ PowerShell 脚本管理工具 (v2.1)
 
 这是一个专为 Windows 用户设计的本地脚本管理系统。它能帮助你轻松管理日常使用的 PowerShell 脚本，支持脚本的**增删改查、版本回滚、功能描述以及一键运行**。
 
@@ -6,10 +6,14 @@
 
 ## 📂 项目结构
 
-- `ScriptManager.py`: **新版管理工具入口 (Python + CustomTkinter)**。提供现代化的图形化界面与集成控制台。
-- `Scripts/`: 脚本存放目录。所有的 `.ps1` 脚本都存放在这里。
-- `VersionBackup/`: 版本备份目录。当你在 GUI 内编辑脚本时，旧版本会自动备份到这里，可通过管理器点击“🔄 回滚”恢复。
-- `ScriptMetaData.json`: 元数据文件。记录脚本的描述、版本号和创建时间。
+- `main.py`: **新版管理工具入口 (Python + CustomTkinter)**。提供现代化的图形化界面与集成控制台。
+- `scripts/`: 脚本存放目录。所有的 `.ps1` 脚本都存放在这里。
+- `backups/`: 版本备份目录。当你在 GUI 内编辑脚本时，旧版本会自动备份到这里，可通过管理器点击“🔄 回滚”恢复。
+- `data/metadata.json`: 元数据文件。记录脚本的描述、版本号和创建时间。
+- `src/`: 源码核心目录。
+    - `core/`: 核心业务逻辑（脚本管理、备份、元数据操作）。
+    - `ui/`: 界面层（主窗口类、对话框模块）。
+    - `config/`: 项目全局配置（路径管理、主题设置）。
 - `CONTRIBUTING.md`: **开发与操作规范**。所有开发者修改本项目前必须阅读。
 
 ---
@@ -24,7 +28,7 @@
 2. **运行管理工具**：
    在终端执行：
    ```bash
-   python ScriptManager.py
+   python main.py
    ```
 
 3. **操作说明**：
@@ -40,19 +44,19 @@
 
 目前系统中已包含以下脚本：
 
-### 1. 📤 [Push-ToGitHub.ps1](file:///d:/powershell_manage/Scripts/Push-ToGitHub.ps1)
+### 1. 📤 [Push-ToGitHub.ps1](file:///d:/powershell_manage/scripts/Push-ToGitHub.ps1)
 - **功能**：一键将本地文件夹推送到 GitHub 仓库。
 - **用法**：运行后输入文件夹路径和 GitHub 仓库 URL，脚本会自动完成 `git init`、`commit` 和 `push`。
 
-### 2. 📑 [Count_files.ps1](file:///d:/powershell_manage/Scripts/Count_files.ps1)
+### 2. 📑 [Count_files.ps1](file:///d:/powershell_manage/scripts/Count_files.ps1)
 - **功能**：递归统计指定文件夹下指定扩展名文件的数量，支持多类型预设和自定义扩展名。
 - **特点**：支持连续统计多个路径，默认开启“继续统计”模式，结果按数量降序显示各类型占比.
 
-### 3. 📦 [Zip_to_img_to_pdf.ps1](file:///d:/powershell_manage/Scripts/Zip_to_img_to_pdf.ps1)
+### 3. 📦 [Zip_to_img_to_pdf.ps1](file:///d:/powershell_manage/scripts/Zip_to_img_to_pdf.ps1)
 - **功能**：全自动化文档数字化流水线。
 - **特点**：集成 ZIP 批量解压、图像提取与高质 PDF 合成。支持任务完成后自动清理原压缩包及临时文件夹，保持工作区整洁。需依赖 ImageMagick 7+。
 
-### 4. 🖼️ [Merge-ImagesToPdf.ps1](file:///d:/powershell_manage/Scripts/Merge-ImagesToPdf.ps1)
+### 4. 🖼️ [Merge-ImagesToPdf.ps1](file:///d:/powershell_manage/scripts/Merge-ImagesToPdf.ps1)
 - **功能**：将指定路径下的所有图片合成为一个 PDF。
 - **特点**：支持多种格式，按字典序排列图片，并以第一张图片的名字作为 PDF 文件名。需依赖 ImageMagick 7+。
 
@@ -65,7 +69,7 @@
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
    ```
-3. **备份机制**：修改脚本时系统会自动备份旧版本到 `VersionBackup` 文件夹。
+3. **备份机制**：修改脚本时系统会自动备份旧版本到 `backups` 文件夹。
 
 ---
 
