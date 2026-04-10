@@ -146,9 +146,10 @@ class ScriptManagerApp(ctk.CTk):
             rollback_btn.pack(side="left", padx=5)
 
     def stop_current_process(self):
-        if self.current_process and self.current_process.poll() is None:
+        proc = self.current_process
+        if proc and proc.poll() is None:
             try:
-                subprocess.run(["taskkill", "/F", "/T", "/PID", str(self.current_process.pid)], capture_output=True)
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True)
                 self.log_console("\n🛑 脚本已强制停止。", tag="error")
                 self.current_process = None
             except Exception as e:
@@ -157,6 +158,9 @@ class ScriptManagerApp(ctk.CTk):
             self.log_console("\n⚠️ 当前没有正在运行的脚本。")
 
     def run_script(self, script_name):
+        # 运行新脚本前清空控制台
+        self.console_text.delete("1.0", "end")
+
         if self.current_process and self.current_process.poll() is None:
             self.log_console(f"--- 🔄 正在停止当前脚本以运行 {script_name} ---")
             self.stop_current_process()
@@ -192,23 +196,29 @@ class ScriptManagerApp(ctk.CTk):
             return
 
         def read_output():
+            proc = self.current_process
             try:
-                while True:
-                    if self.current_process is None:
-                        break
-                    char = self.current_process.stdout.read(1)
-                    if not char and self.current_process.poll() is not None:
+                while proc:
+                    char = proc.stdout.read(1)
+                    if not char and proc.poll() is not None:
                         break
                     if char:
                         self.after(0, self.log_console, char, None, False)
             except Exception as e:
-                self.after(0, self.log_console, f"\n❌ 读取输出出错: {e}")
+                # 如果 proc 是因为被杀死而导致读取失败，且 self.current_process 已被置空，则忽略
+                if self.current_process is not None:
+                    self.after(0, self.log_console, f"\n❌ 读取输出出错: {e}")
             
-            if self.current_process:
-                self.current_process.stdout.close()
-                self.current_process.wait()
-                self.after(0, self.log_console, f"\n--- ✅ {script_name} 执行完毕 ---")
-                self.current_process = None
+            if proc:
+                try:
+                    proc.stdout.close()
+                except:
+                    pass
+                
+                # 检查是否是正常结束
+                if self.current_process == proc:
+                    self.after(0, self.log_console, f"\n--- ✅ {script_name} 执行完毕 ---")
+                    self.current_process = None
 
         threading.Thread(target=read_output, daemon=True).start()
 
@@ -227,11 +237,12 @@ class ScriptManagerApp(ctk.CTk):
         ctk.set_appearance_mode(new_appearance_mode)
 
     def send_to_process(self):
-        if self.current_process and self.current_process.poll() is None:
+        proc = self.current_process
+        if proc and proc.poll() is None:
             user_input = self.input_entry.get() + "\n"
             try:
-                self.current_process.stdin.write(user_input)
-                self.current_process.stdin.flush()
+                proc.stdin.write(user_input)
+                proc.stdin.flush()
                 self.log_console(f"> {user_input.strip()}", tag="input")
                 self.input_entry.delete(0, "end")
             except Exception as e:
